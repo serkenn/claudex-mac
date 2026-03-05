@@ -11,13 +11,17 @@ import {
   applyDefaultEffort,
   approxTokenCount,
   hasEffortFlag,
+  parseClaudexArgs,
   parseApiKeyFromAuthJson,
   resolveUpstreamFromCodexConfig,
   sanitizeToolFields,
   type JsonObject,
 } from "./core";
 
-const args = process.argv.slice(2);
+const rawArgs = process.argv.slice(2);
+const parsedArgs = parseClaudexArgs(rawArgs);
+const args = parsedArgs.claudeArgs;
+const safeMode = parsedArgs.safeMode;
 const preserveClientEffort = hasEffortFlag(args);
 const defaultReasoningEffort = process.env.CLAUDEX_DEFAULT_REASONING_EFFORT || "xhigh";
 const debug = process.env.CLAUDEX_DEBUG === "1";
@@ -389,22 +393,28 @@ async function main(): Promise<void> {
   });
 
   const proxyUrl = `http://${listenHost}:${listenPort}`;
-  console.error(`claudex: proxy=${proxyUrl} force_model=${runtime.forcedModel}`);
+  console.error(`claudex: proxy=${proxyUrl} force_model=${runtime.forcedModel} safe_mode=${safeMode}`);
+
+  const childEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    ANTHROPIC_BASE_URL: proxyUrl,
+    ANTHROPIC_API_KEY: "claudex-local",
+    ANTHROPIC_MODEL: runtime.forcedModel,
+    ANTHROPIC_SMALL_FAST_MODEL: runtime.forcedModel,
+    ANTHROPIC_DEFAULT_OPUS_MODEL: runtime.forcedModel,
+    ANTHROPIC_DEFAULT_SONNET_MODEL: runtime.forcedModel,
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: runtime.forcedModel,
+    CLAUDE_CODE_SUBAGENT_MODEL: runtime.forcedModel,
+  };
+  if (safeMode) {
+    childEnv.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
+  } else {
+    delete childEnv.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC;
+  }
 
   const child = spawn(claudeBinary, args, {
     stdio: "inherit",
-    env: {
-      ...process.env,
-      ANTHROPIC_BASE_URL: proxyUrl,
-      ANTHROPIC_API_KEY: "claudex-local",
-      ANTHROPIC_MODEL: runtime.forcedModel,
-      ANTHROPIC_SMALL_FAST_MODEL: runtime.forcedModel,
-      ANTHROPIC_DEFAULT_OPUS_MODEL: runtime.forcedModel,
-      ANTHROPIC_DEFAULT_SONNET_MODEL: runtime.forcedModel,
-      ANTHROPIC_DEFAULT_HAIKU_MODEL: runtime.forcedModel,
-      CLAUDE_CODE_SUBAGENT_MODEL: runtime.forcedModel,
-      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
-    },
+    env: childEnv,
   });
 
   const forwardSignal = (signal: NodeJS.Signals): void => {

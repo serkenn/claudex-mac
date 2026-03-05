@@ -3,6 +3,7 @@ import {
   applyDefaultEffort,
   approxTokenCount,
   hasEffortFlag,
+  parseClaudexArgs,
   parseApiKeyFromAuthJson,
   parseCodexConfig,
   resolveUpstreamFromCodexConfig,
@@ -14,6 +15,20 @@ describe("hasEffortFlag", () => {
     expect(hasEffortFlag(["--foo", "--effort"])).toBe(true);
     expect(hasEffortFlag(["--effort=xhigh"])).toBe(true);
     expect(hasEffortFlag(["--model", "x"])).toBe(false);
+  });
+});
+
+describe("parseClaudexArgs", () => {
+  test("default safe mode is true", () => {
+    const parsed = parseClaudexArgs(["-p", "hello"]);
+    expect(parsed.safeMode).toBe(true);
+    expect(parsed.claudeArgs).toEqual(["-p", "hello"]);
+  });
+
+  test("consumes --no-safe and disables safe mode", () => {
+    const parsed = parseClaudexArgs(["--no-safe", "-p", "hello"]);
+    expect(parsed.safeMode).toBe(false);
+    expect(parsed.claudeArgs).toEqual(["-p", "hello"]);
   });
 });
 

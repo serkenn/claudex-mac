@@ -4,6 +4,21 @@ export function hasEffortFlag(args: string[]): boolean {
   return args.some((arg) => arg === "--effort" || arg.startsWith("--effort="));
 }
 
+export function parseClaudexArgs(rawArgs: string[]): { claudeArgs: string[]; safeMode: boolean } {
+  let safeMode = true;
+  const claudeArgs: string[] = [];
+
+  for (const arg of rawArgs) {
+    if (arg === "--no-safe") {
+      safeMode = false;
+      continue;
+    }
+    claudeArgs.push(arg);
+  }
+
+  return { claudeArgs, safeMode };
+}
+
 export interface ParsedCodexConfig {
   model?: string;
   modelProvider?: string;

@@ -2,7 +2,7 @@
 
 `claudex` is a Bun-based launcher that runs Claude Code against an OpenAI-compatible endpoint.
 
-You can get binary from [Releases](https://github.com/EdamAme-x/claudex/releases)
+You can download binaries from [Releases](https://github.com/EdamAme-x/claudex/releases).
 
 ## Local usage
 
@@ -25,14 +25,19 @@ bun install
 ./claudex
 ```
 
+Wrapper flags:
+
+- `--no-safe`: disables `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` for that run.
+- By default, `claudex` enables safe mode (`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`).
+
 Optional environment variables:
 
-- `CLAUDEX_FORCE_MODEL` (default: value from `~/.codex/config.toml` `model`, fallback `gpt-5.3-codex`)
+- `CLAUDEX_FORCE_MODEL` (default: value of `model` from `~/.codex/config.toml`; fallback: `gpt-5.3-codex`)
 - `CLAUDEX_DEFAULT_REASONING_EFFORT` (default: `xhigh`)
 - `CLAUDEX_CLAUDE_BIN`
-- `CLAUDEX_CODEX_CONFIG` (override `~/.codex/config.toml`)
-- `CLAUDEX_CODEX_AUTH` (override `~/.codex/auth.json`)
-- `CLAUDEX_MODEL_PROVIDER` (override `model_provider` selection)
+- `CLAUDEX_CODEX_CONFIG` (overrides `~/.codex/config.toml`)
+- `CLAUDEX_CODEX_AUTH` (overrides `~/.codex/auth.json`)
+- `CLAUDEX_MODEL_PROVIDER` (overrides `model_provider` selection)
 - `CLAUDEX_UPSTREAM_BASE_URL` (force endpoint URL)
 - `CLAUDEX_UPSTREAM_API_KEY` (force API key)
 - `CLAUDEX_PORT`
