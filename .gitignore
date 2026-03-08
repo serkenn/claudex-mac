@@ -13,6 +13,7 @@ dist/
 !.github/workflows
 !.github/workflows/
 !.github/workflows/**
+!README.md
 !package.json
 !package-lock.json
 !tsconfig.json
